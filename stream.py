@@ -89,6 +89,7 @@ def findVideoFile(rarFile):
 
 def findMainArchive(dir):
 	files = os.listdir(dir)
+	files = sorted(files)
 	for file in files:
 		# All files of a multipart-rar have to have the same filename,
 		# so the first .rar is most likely the one we want.
