@@ -2,8 +2,7 @@
 
 ##############################################################################
 ### NZBGET QUEUE SCRIPT 												   ###
-
-### QUEUE EVENTS: FILE_DOWNLOADED
+### QUEUE EVENTS: FILE_DOWNLOADED										   ###
 
 # Stream video while downloading.
 #
