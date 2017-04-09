@@ -42,7 +42,7 @@ def getUnrarExecutable():
 
 def unrarFile(rarFile, fileName, destinationDir):
 	try:
-		command = [getUnrarExecutable(), "x", "-o+", "-kb"]
+		command = [getUnrarExecutable(), "e", "-o+", "-kb"]
 		if 'NZBPR__UNPACK_PASSWORD' in os.environ:
 			command += ['-p'+os.environ['NZBPR__UNPACK_PASSWORD']]
 		else:
@@ -123,7 +123,8 @@ def main():
 
 	rarFile = findMainArchive(DL_PATH)
 	if rarFile:
-		videoFile = findVideoFile(rarFile)
+		inRarPath = findVideoFile(rarFile)
+		dummy, videoFile = os.path.split(inRarPath)
 		if videoFile:
 			videoPath = os.path.join(STREAM_DIR, videoFile)
 			STREAM_FILE += os.path.splitext(videoPath)[1]
@@ -132,7 +133,7 @@ def main():
 			if not os.path.exists(STREAM_DIR):
 				os.makedirs(STREAM_DIR)
 
-			unrarFile(rarFile, videoFile, STREAM_DIR)
+			unrarFile(rarFile, inRarPath, STREAM_DIR)
 
 			if FIRST_FILE:
 				os.rename(videoPath, STREAM_FILE)
