@@ -15,7 +15,3 @@ Also, the nzb should be sorted so that the first archive will be the first file 
 ## Usage:
 
 Just put the script into your nzbget-scripts folder and activate it in the settings.
-
-##TODO:
-
-Maybe just extract `if category == "stream"` or something like that?
