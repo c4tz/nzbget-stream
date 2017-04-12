@@ -10,7 +10,7 @@ When the next file has finished downloading, it will extract the video-file agai
 
 **Warning:** This was only tested with VLC! Other players might choke on incomplete video-files.
 
-Also, the nzb should be sorted so that the first archive will be the first file downloaded. Else you have to wait before the stream begins! But I might aswell write another script to do that in the future ;)
+Also, the nzb should be sorted so that the first archive will be the first file downloaded. You can ensure this by using this [scan-script](https://github.com/BlkChockr/nzbget-sort). Else you have to wait before the stream begins!
 
 ## Usage:
 
