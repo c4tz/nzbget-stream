@@ -2,6 +2,19 @@
 
 Stream video-files while you are downloading them with nzbget.
 
+## Dependencies
+
+You will need:
+
+* [python](https://www.python.org/downloads/)
+* lxml (a python-package)
+
+Install lxml:
+
+```console
+# pip install lxml
+```
+
 ## Detailed explanation
 
 This script will sort the files inside your NZB when you add it to the queue, and then (while downloading) scan the destination folder for .rar-Files, look for video files in them and then try to extract the biggest one from the first archive. After that, it will open the video-file with the standard player.
