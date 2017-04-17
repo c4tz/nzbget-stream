@@ -6,6 +6,7 @@ Stream video-files while you are downloading them with nzbget.
 
 You will need:
 
+* [nzbget](https://github.com/nzbget/nzbget) >= 19.0-testing-r1943
 * [python](https://www.python.org/downloads/)
 * lxml (a python-package)
 
