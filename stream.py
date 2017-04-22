@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 ##############################################################################
-### NZBGET SCAN/QUEUE/POST-PROCESSING SCRIPT                                ###
-### QUEUE EVENTS: FILE_DOWNLOADED                                           ###
+### NZBGET QUEUE SCRIPT                                                    ###
+### QUEUE EVENTS: FILE_DOWNLOADED                                          ###
 
 # Stream video while downloading.
 #
@@ -13,7 +13,7 @@
 # NOTE: This script requires Python and lxml
 # to be installed on your system.
 
-### NZBGET SCAN/QUEUE/POST-PROCESSING SCRIPT                                ###
+### NZBGET QUEUE SCRIPT                                                    ###
 ##############################################################################
 
 import os, shlex, subprocess, sys
