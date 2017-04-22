@@ -16,108 +16,7 @@
 ### NZBGET SCAN/QUEUE/POST-PROCESSING SCRIPT                                ###
 ##############################################################################
 
-import base64, copy, os, re, shlex, shutil, subprocess, sys, tempfile, time
-from lxml import etree as ET
-try:
-    from xmlrpclib import ServerProxy # python 2
-except ImportError:
-    from xmlrpc.client import ServerProxy # python 3
-
-class Strip:
-    def __init__(self):
-        self.namespaces = {'nzb': 'http://www.newzbin.com/DTD/2003/nzb'}
-
-    def writeFile(self, path, data):
-        with open(path, 'w') as f:
-                f.write(data)
-
-    def sort(self, nzbTree):
-        files = nzbTree.xpath('nzb:file', namespaces=self.namespaces)
-        files = sorted(files, key=lambda file: file.get('subject'))
-
-        parFiles, rarFiles = [], []
-        for file in files:
-            if '.rar' in file.get('subject'):
-                rarFiles.append(file)
-            elif '.par2' in file.get('subject'):
-                parFiles.append(file)
-        files = list(set(files) - set(rarFiles))
-        files = list(set(files) - set(parFiles))
-        firstPar = [parFiles.pop(0)] if len(parFiles) > 0 else []
-        files = firstPar + rarFiles + files + parFiles
-
-        for file in files:
-            nzbTree.getroot().remove(file)
-            nzbTree.getroot().append(file)
-        
-        return nzbTree
-
-    def scan(self):
-        nzbFile = os.environ['NZBNP_FILENAME']
-        if '[SORTED].nzb' in nzbFile:
-            quit()
-
-        nzb = ET.parse(nzbFile)
-
-        rarFiles = nzb.xpath('nzb:file[contains(@subject, ".rar")]', namespaces=self.namespaces)
-        if len(rarFiles) == 0: # obfuscated NZB
-            tmpNZB = copy.deepcopy(nzb)
-            segments = tmpNZB.xpath('nzb:file/nzb:segments/nzb:segment[@number!="1"]', namespaces=self.namespaces)
-            [element.getparent().remove(element) for element in segments]
-            
-            tmpFile = tempfile.mkstemp()[1]
-            self.writeFile(tmpFile, ET.tostring(nzb, encoding=nzb.docinfo.encoding).decode(nzb.docinfo.encoding))
-
-            # set params for PostProcessor
-            print('[NZB] NZBPR_*Unpack:=no')
-            print('[NZB] NZBPR_*naming=nzb')
-            print('[NZB] NZBPR_nzbtmp='+tmpFile)
-
-            self.writeFile(nzbFile, ET.tostring(tmpNZB, encoding=tmpNZB.docinfo.encoding).decode(tmpNZB.docinfo.encoding))
-        else:
-            nzb = self.sort(nzb)
-            self.writeFile(nzbFile, ET.tostring(nzb, encoding=nzb.docinfo.encoding).decode(nzb.docinfo.encoding))
-
-    def process(self):
-        if not 'NZBPR_nzbtmp' in os.environ:
-            sys.exit(95) # Post-process skipped
-
-        host = 'localhost' #script will be called from nzbget => same host
-        port = os.environ['NZBOP_CONTROLPORT']
-        if ('NZBOP_CONTROLUSERNAME' and 'NZBOP_CONTROLPASSWORD') in os.environ:
-            username = os.environ['NZBOP_CONTROLUSERNAME'];
-            password = os.environ['NZBOP_CONTROLPASSWORD'];
-            rpcUrl = 'http://%s:%s@%s:%s/xmlrpc' % (username, password, host, port);
-        else:
-            rpcUrl = 'http://%s:%s/xmlrpc' % (host, port)        
-        server = ServerProxy(rpcUrl)
-
-        nzbName = os.environ['NZBPP_NZBNAME'] + ' [SORTED].nzb'
-        nzbID = int(os.environ['NZBPP_NZBID'])
-        nzb = ET.parse(os.environ['NZBPR_nzbtmp'])
-
-        log = server.loadlog(nzbID, 0, 999999)
-        for entry in log:
-            match = re.match(r'Renaming (.*) to (.*)', entry['Text'])
-            if match:
-                file = nzb.xpath('nzb:file[contains(@subject, "' + match.group(1) + '")]', namespaces=self.namespaces)[0]
-                file.set("subject", file.get('subject').replace(match.group(1), match.group(2)))
-        nzb = self.sort(nzb)
-        
-        ppParams = [('*naming', 'nzb')]
-        if 'NZBPR__UNPACK_PASSWORD' in os.environ:
-                ppParams += [os.environ['NZBPR__UNPACK_PASSWORD']]
-
-        # cleanup
-        shutil.rmtree(os.environ['NZBPP_DIRECTORY'])
-        os.remove(os.environ['NZBPR_nzbtmp'])
-        server.editqueue('HistoryDelete', '', [nzbID])
-
-        server.append(nzbName,
-            base64.b64encode(ET.tostring(nzb, encoding=nzb.docinfo.encoding)).decode('utf-8'),
-            '', 0, True, False, '', 0, 'SCORE', ppParams)
-
-        sys.exit(93) # Post-process successful
+import os, shlex, subprocess, sys
 
 class Stream:
 
@@ -246,15 +145,5 @@ class Stream:
                     os.remove(videoPath)
 
 
-def main():
-    if 'NZBNP_FILENAME' in os.environ: # scan-script
-        strip = Strip()
-        strip.scan()
-    if 'NZBNA_EVENT' in os.environ: # queue-script
-        stream = Stream()
-        stream.show()
-    if 'NZBPP_DIRECTORY' in os.environ: # pp-script
-        strip = Strip()
-        strip.process()
-    
-main()
+stream = Stream()
+stream.show()
