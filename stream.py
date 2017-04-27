@@ -7,8 +7,8 @@
 # Stream video while downloading.
 #
 # This script partially extracts video from 
-# .rar files after sorting the nzb so that 
-# you can stream it while downloading.
+# .rar files while downloading so that 
+# you can stream it .
 #
 # NOTE: This script requires Python and lxml
 # to be installed on your system.
